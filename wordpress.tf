@@ -16,10 +16,10 @@ provider "aws" {
 # VPC and networking
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
-  
+
   enable_dns_hostnames = true
   enable_dns_support   = true
-  
+
   tags = {
     Name = "claranet"
   }
@@ -30,12 +30,12 @@ resource "aws_ecs_cluster" "wordpress" {
   name = "wordpress-cluster"
 
   tags = {
-    scope: "claranet"
+    scope : "claranet"
   }
 
   setting {
     name  = "containerInsights"
-    value = "disabled"  # Per risparmiare sui costi
+    value = "disabled" # Per risparmiare sui costi
   }
 }
 
@@ -43,16 +43,16 @@ resource "aws_ecs_cluster" "wordpress" {
 resource "aws_ecs_task_definition" "wordpress" {
   family                   = "wordpress"
   requires_compatibilities = ["FARGATE"]
-  network_mode            = "awsvpc"
-  cpu                     = 256
-  memory                  = 512
+  network_mode             = "awsvpc"
+  cpu                      = 256
+  memory                   = 512
 
   tags = {
-    scope: "claranet"
+    scope : "claranet"
   }
 
   volume {
-    name  = "wordpress-data"
+    name = "wordpress-data"
     efs_volume_configuration {
       file_system_id = aws_efs_file_system.wordpress.id
     }
@@ -62,23 +62,31 @@ resource "aws_ecs_task_definition" "wordpress" {
     {
       name  = "wordpress"
       image = "wordpress:${var.wordpress_version}"
-      
+
       environment = [
-#         {
-#           name  = "WORDPRESS_DB_HOST"
-#           value = aws_rds_cluster.main.endpoint
-#         },
-#         {
-#           name  = "WORDPRESS_DB_USER"
-#           value = var.db_username
-#         }
+        #         {
+        #           name  = "WORDPRESS_DB_HOST"
+        #           value = aws_rds_cluster.main.endpoint
+        #         },
+        #         {
+        #           name  = "WORDPRESS_DB_USER"
+        #           value = var.db_username
+        #         }
       ]
-      
+
+      portMappings = [
+        {
+          containerPort = 80
+          protocol      = "tcp"
+          hostPort      = 80
+        }
+      ]
+
       mountPoints = [
         {
           sourceVolume  = "wordpress-data"
           containerPath = "/var/www/html"
-          readOnly     = false
+          readOnly      = false
         }
       ]
     }
@@ -110,7 +118,7 @@ resource "aws_efs_file_system" "wordpress" {
   creation_token = "wordpress"
 
   tags = {
-    scope: "claranet"
+    scope : "claranet"
   }
 
   lifecycle_policy {
