@@ -35,7 +35,7 @@ resource "aws_ecs_cluster" "wordpress" {
 
   setting {
     name  = "containerInsights"
-    value = "disabled" # Per risparmiare sui costi
+    value = "enhanced" #
   }
 }
 
@@ -54,43 +54,89 @@ resource "aws_ecs_task_definition" "wordpress" {
   volume {
     name = "wordpress-data"
     efs_volume_configuration {
-      file_system_id = aws_efs_file_system.wordpress.id
+      file_system_id          = aws_efs_file_system.wordpress.id
+      transit_encryption      = "ENABLED"
+      transit_encryption_port = 2049
+      authorization_config {
+        iam = "DISABLED"
+      }
     }
   }
 
-  container_definitions = jsonencode([
-    {
-      name  = "wordpress"
-      image = "wordpress:${var.wordpress_version}"
+  container_definitions = jsonencode([{
+    name       = "wordpress"
+    image      = "wordpress"
+    essential  = true
+    cpu        = 256
+    memory     = 512
+    entryPoint = ["sh", "-c"]
+    command    = ["ls -la /var/www/html"]
+    volumes = [{
+      name = "wordpress-data"
+      efsVolumeConfiguration = {
+        fileSystemId = aws_efs_file_system.wordpress.id
+      }
+    }]
+    mountPoints = [{
+      sourceVolume  = "wordpress-data"
+      containerPath = "/var/www/html"
+      readOnly      = false
+    }]
+    environment = [
+      #       {
+      #         name = "WORDPRESS_DB_HOST"
+      #         value = "127.0.0.1"
+      #       },
+      #       {
+      #         name  = "WORDPRESS_DB_USER"
+      #         value = local.username
+      #       },
+      #       {
+      #         name  = "WORDPRESS_DB_PASSWORD"
+      #         value = local.password
+      #       },
+#       {
+#         name  = "WORDPRESS_DB_NAME"
+#         value = "wordpressdb"
+#     }
+    ]
+    portMappings = [{
+      protocol      = "tcp"
+      containerPort = 80
+      hostPort      = 80
+    }]
+  }])
+}
 
-      environment = [
-        #         {
-        #           name  = "WORDPRESS_DB_HOST"
-        #           value = aws_rds_cluster.main.endpoint
-        #         },
-        #         {
-        #           name  = "WORDPRESS_DB_USER"
-        #           value = var.db_username
-        #         }
-      ]
 
-      portMappings = [
-        {
-          containerPort = 80
-          protocol      = "tcp"
-          hostPort      = 80
-        }
-      ]
+# ECS Service
+resource "aws_ecs_service" "wordpress" {
+  name            = "wordpress"
+  cluster         = aws_ecs_cluster.wordpress.id
+  task_definition = aws_ecs_task_definition.wordpress.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
 
-      mountPoints = [
-        {
-          sourceVolume  = "wordpress-data"
-          containerPath = "/var/www/html"
-          readOnly      = false
-        }
-      ]
-    }
-  ])
+  deployment_circuit_breaker {
+    enable = true
+    rollback = true
+  }
+
+  network_configuration {
+    subnets          = aws_subnet.public[*].id
+    security_groups  = [aws_security_group.ecs.id]
+    assign_public_ip = true
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.wordpress.arn
+    container_name   = "wordpress"
+    container_port   = 80
+  }
+
+  tags = {
+    scope = "claranet"
+  }
 }
 
 # Aurora Serverless
