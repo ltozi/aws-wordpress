@@ -64,41 +64,55 @@ resource "aws_ecs_task_definition" "wordpress" {
   }
 
   container_definitions = jsonencode([{
-    name       = "wordpress"
-    image      = "public.ecr.aws/docker/library/wordpress:latest"
-    essential  = true
-    cpu        = 256
-    memory     = 512
-    entryPoint = ["sh", "-c"]
-    command    = ["ls -la /var/www/html"]
+    name      = "wordpress"
+    image     = "public.ecr.aws/docker/library/wordpress:latest"
+    essential = true
+    cpu       = 256
+    memory    = 512
+    #     entryPoint = ["sh", "-c"]
+    #     command    = ["ls -la /var/www/html"]
+
+    # Add logging configuration
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        "awslogs-group"         = "/ecs/wordpress"
+        "awslogs-region"        = var.aws_region
+        "awslogs-stream-prefix" = "wordpress"
+        "awslogs-create-group"  = "true"
+      }
+    }
+
     volumes = [{
       name = "wordpress-data"
       efsVolumeConfiguration = {
         fileSystemId = aws_efs_file_system.wordpress.id
       }
     }]
+
     mountPoints = [{
       sourceVolume  = "wordpress-data"
       containerPath = "/var/www/html"
       readOnly      = false
     }]
+
     environment = [
-      #       {
-      #         name = "WORDPRESS_DB_HOST"
-      #         value = "127.0.0.1"
-      #       },
-      #       {
-      #         name  = "WORDPRESS_DB_USER"
-      #         value = local.username
-      #       },
-      #       {
-      #         name  = "WORDPRESS_DB_PASSWORD"
-      #         value = local.password
-      #       },
-#       {
-#         name  = "WORDPRESS_DB_NAME"
-#         value = "wordpressdb"
-#     }
+      {
+        name  = "WORDPRESS_DB_HOST"
+        value = "dummy-host" # Temporary value
+      },
+      {
+        name  = "WORDPRESS_DB_USER"
+        value = "dummy-user" # Temporary value
+      },
+      {
+        name  = "WORDPRESS_DB_PASSWORD"
+        value = "dummy-pass" # Temporary value
+      },
+      {
+        name  = "WORDPRESS_DB_NAME"
+        value = "wordpress" # Temporary value
+      }
     ]
     portMappings = [{
       protocol      = "tcp"
@@ -118,7 +132,7 @@ resource "aws_ecs_service" "wordpress" {
   launch_type     = "FARGATE"
 
   deployment_circuit_breaker {
-    enable = true
+    enable   = true
     rollback = false
   }
 
@@ -169,5 +183,16 @@ resource "aws_efs_file_system" "wordpress" {
 
   lifecycle_policy {
     transition_to_ia = "AFTER_30_DAYS"
+  }
+}
+
+
+# Add CloudWatch Log Group
+resource "aws_cloudwatch_log_group" "wordpress" {
+  name              = "/ecs/wordpress"
+  retention_in_days = 30
+
+  tags = {
+    scope = "claranet"
   }
 }
