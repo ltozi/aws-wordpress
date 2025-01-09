@@ -75,6 +75,18 @@ resource "aws_iam_role_policy" "ecs_task_role_policy" {
           "elasticfilesystem:ClientWrite"
         ]
         Resource = aws_efs_file_system.wordpress.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "*"
       }
     ]
   })
@@ -135,11 +147,11 @@ resource "aws_ecs_task_definition" "wordpress" {
   }
 
   container_definitions = jsonencode([{
-    name                   = "wordpress"
-    image                  = "wordpress:latest"
-    essential              = true
-    cpu                    = 256
-    memory                 = 512
+    name      = "wordpress"
+    image     = "wordpress:latest"
+    essential = true
+    cpu       = 256
+    memory    = 512
     #     entryPoint = ["sh", "-c"]
     #     command    = ["ls -la /var/www/html"]
 
@@ -196,11 +208,12 @@ resource "aws_ecs_task_definition" "wordpress" {
 
 # ECS Service
 resource "aws_ecs_service" "wordpress" {
-  name            = "wordpress"
-  cluster         = aws_ecs_cluster.wordpress.id
-  task_definition = aws_ecs_task_definition.wordpress.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
+  name                   = "wordpress"
+  cluster                = aws_ecs_cluster.wordpress.id
+  task_definition        = aws_ecs_task_definition.wordpress.arn
+  desired_count          = 1
+  launch_type            = "FARGATE"
+  enable_execute_command = true
 
   #   deployment_maximum_percent = 100
   #   deployment_minimum_healthy_percent = 0
@@ -306,7 +319,7 @@ resource "aws_cloudwatch_log_group" "wordpress" {
 # First, define the autoscaling target
 resource "aws_appautoscaling_target" "wordpress" {
   max_capacity       = 4
-  min_capacity      = 1
+  min_capacity       = 1
   resource_id        = "service/${aws_ecs_cluster.wordpress.name}/${aws_ecs_service.wordpress.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
@@ -315,7 +328,7 @@ resource "aws_appautoscaling_target" "wordpress" {
 # CPU-based scaling policy
 resource "aws_appautoscaling_policy" "wordpress_cpu" {
   name               = "wordpress-cpu-autoscaling"
-  policy_type       = "TargetTrackingScaling"
+  policy_type        = "TargetTrackingScaling"
   resource_id        = aws_appautoscaling_target.wordpress.resource_id
   scalable_dimension = aws_appautoscaling_target.wordpress.scalable_dimension
   service_namespace  = aws_appautoscaling_target.wordpress.service_namespace
@@ -324,7 +337,7 @@ resource "aws_appautoscaling_policy" "wordpress_cpu" {
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
-    target_value = 50.0
+    target_value       = 50.0
     scale_in_cooldown  = 60
     scale_out_cooldown = 60
   }
