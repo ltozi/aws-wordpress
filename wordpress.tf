@@ -313,7 +313,7 @@ resource "aws_efs_mount_target" "wordpress" {
 # Add CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "wordpress" {
   name              = "/ecs/wordpress"
-  retention_in_days = 30
+  retention_in_days = 1
 
   tags = {
     scope = "claranet"
