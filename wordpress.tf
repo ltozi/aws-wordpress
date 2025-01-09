@@ -170,19 +170,19 @@ resource "aws_ecs_task_definition" "wordpress" {
     environment = [
       {
         name  = "WORDPRESS_DB_HOST"
-        value = "dummy-host" # Temporary value
+        value = aws_db_instance.main.endpoint
       },
       {
         name  = "WORDPRESS_DB_USER"
-        value = "dummy-user" # Temporary value
+        value = var.db_username
       },
       {
         name  = "WORDPRESS_DB_PASSWORD"
-        value = "dummy-pass" # Temporary value
+        value = var.db_password
       },
       {
         name  = "WORDPRESS_DB_NAME"
-        value = "wordpress" # Temporary value
+        value = "wordpress"
       }
     ]
     portMappings = [{
@@ -202,8 +202,8 @@ resource "aws_ecs_service" "wordpress" {
   desired_count   = 1
   launch_type     = "FARGATE"
 
-#   deployment_maximum_percent = 100
-#   deployment_minimum_healthy_percent = 0
+  #   deployment_maximum_percent = 100
+  #   deployment_minimum_healthy_percent = 0
 
   deployment_circuit_breaker {
     enable   = true
@@ -226,26 +226,6 @@ resource "aws_ecs_service" "wordpress" {
     scope = "claranet"
   }
 }
-
-# Aurora Serverless
-# resource "aws_rds_cluster" "main" {
-#   cluster_identifier     = "wordpress-db"
-#   engine                = "aurora-mysql"
-#   engine_mode           = "serverless"
-#   database_name         = "wordpress"
-#   master_username       = var.db_username
-#   master_password       = var.db_password
-#   skip_final_snapshot   = true
-#   tags = {
-#     scope: "claranet"
-#   }
-#   scaling_configuration {
-#     auto_pause               = true
-#     max_capacity            = 2
-#     min_capacity            = 1
-#     seconds_until_auto_pause = 300
-#   }
-# }
 
 # EFS File System
 resource "aws_efs_file_system" "wordpress" {
