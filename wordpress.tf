@@ -135,11 +135,11 @@ resource "aws_ecs_task_definition" "wordpress" {
   }
 
   container_definitions = jsonencode([{
-    name      = "wordpress"
-    image     = "public.ecr.aws/docker/library/wordpress:latest"
-    essential = true
-    cpu       = 256
-    memory    = 512
+    name                   = "wordpress"
+    image                  = "public.ecr.aws/docker/library/wordpress:latest"
+    essential              = true
+    cpu                    = 256
+    memory                 = 512
     #     entryPoint = ["sh", "-c"]
     #     command    = ["ls -la /var/www/html"]
 
@@ -299,3 +299,8 @@ resource "aws_cloudwatch_log_group" "wordpress" {
     scope = "claranet"
   }
 }
+
+
+
+### Autoscaling policies
+
