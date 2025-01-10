@@ -1,36 +1,9 @@
-# main.tf
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-  }
-
-}
-
-provider "aws" {
-  region = var.aws_region
-}
-
-# VPC and networking
-resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
-
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-
-  tags = {
-    Name = "claranet"
-  }
-}
-
 # ECS Cluster
 resource "aws_ecs_cluster" "wordpress" {
   name = "wordpress-cluster"
 
   tags = {
-    scope : "claranet"
+    scope = "wordpress"
   }
 
   setting {
@@ -57,7 +30,7 @@ resource "aws_iam_role" "ecs_task_role" {
   })
 
   tags = {
-    scope = "claranet"
+    scope = "terraform-worpress"
   }
 }
 
@@ -110,7 +83,7 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   })
 
   tags = {
-    scope = "claranet"
+    scope = "terraform-worpress"
   }
 }
 
@@ -130,7 +103,7 @@ resource "aws_ecs_task_definition" "wordpress" {
   task_role_arn            = aws_iam_role.ecs_task_role.arn
 
   tags = {
-    scope : "claranet"
+    scope = "wordpress"
   }
 
   volume {
@@ -236,7 +209,7 @@ resource "aws_ecs_service" "wordpress" {
   }
 
   tags = {
-    scope = "claranet"
+    scope = "terraform-worpress"
   }
 }
 
@@ -246,7 +219,7 @@ resource "aws_efs_file_system" "wordpress" {
   encrypted      = true
 
   tags = {
-    scope : "claranet"
+    scope = "wordpress"
   }
 
   lifecycle_policy {
@@ -273,24 +246,7 @@ resource "aws_efs_access_point" "wordpress" {
   }
 
   tags = {
-    scope = "claranet"
-  }
-}
-
-# EFS Security Group
-resource "aws_security_group" "efs" {
-  name_prefix = "wordpress-efs-"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    from_port       = 2049
-    to_port         = 2049
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ecs.id]
-  }
-
-  tags = {
-    scope = "claranet"
+    scope = "terraform-worpress"
   }
 }
 
@@ -309,7 +265,7 @@ resource "aws_cloudwatch_log_group" "wordpress" {
   retention_in_days = 1
 
   tags = {
-    scope = "claranet"
+    scope = "terraform-worpress"
   }
 }
 
