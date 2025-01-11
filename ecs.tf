@@ -87,6 +87,25 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   }
 }
 
+# Update the ECS task execution role to allow reading secrets
+resource "aws_iam_role_policy" "ecs_task_execution_role_policy_secrets" {
+  name = "wordpress-execution-role-secrets-policy"
+  role = aws_iam_role.ecs_task_execution_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = [aws_secretsmanager_secret.wordpress_db.arn]
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
@@ -152,6 +171,13 @@ resource "aws_ecs_task_definition" "wordpress" {
       readOnly      = false
     }]
 
+    secrets = [
+      {
+        name      = "WORDPRESS_DB_PASSWORD"
+        valueFrom = "${aws_secretsmanager_secret.wordpress_db.arn}:password::"
+      }
+    ]
+
     environment = [
       {
         name  = "WORDPRESS_DB_HOST"
@@ -160,10 +186,6 @@ resource "aws_ecs_task_definition" "wordpress" {
       {
         name  = "WORDPRESS_DB_USER"
         value = var.db_username
-      },
-      {
-        name  = "WORDPRESS_DB_PASSWORD"
-        value = var.db_password
       },
       {
         name  = "WORDPRESS_DB_NAME"
