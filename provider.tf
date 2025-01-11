@@ -7,6 +7,11 @@ terraform {
     }
   }
 
+  # This bucket must already exist. See pre requirements in README.md for the command to create it.
+  backend "s3" {
+    bucket = "terraform-wordpress-state"
+  }
+
 }
 
 provider "aws" {
