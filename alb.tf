@@ -128,6 +128,77 @@ resource "aws_lb_listener" "https" {
   }
 }
 
+# WAF Configuration
+resource "aws_wafv2_web_acl" "wordpress" {
+  name        = "wordpress-waf-acl"
+  description = "WAF Web ACL for WordPress ALB"
+  scope       = "REGIONAL"
+
+  default_action {
+    allow {}
+  }
+
+  rule {
+    name     = "SQLiRule"
+    priority = 1
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesSQLiRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "SQLiRuleMetric"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "RateLimitRule"
+    priority = 2
+
+    action {
+      block {}
+    }
+
+    statement {
+      rate_based_statement {
+        limit              = 100
+        aggregate_key_type = "IP"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "RateLimitRuleMetric"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "WordPressWAFACLMetric"
+    sampled_requests_enabled   = true
+  }
+
+  tags = {
+    scope = "terraform-worpress"
+  }
+}
+
+# Associate WAF Web ACL with the ALB
+resource "aws_wafv2_web_acl_association" "wordpress" {
+  resource_arn = aws_lb.wordpress.arn
+  web_acl_arn  = aws_wafv2_web_acl.wordpress.arn
+}
+
 # Add an output for the ALB DNS name
 output "wordpress_urls" {
   description = "WordPress URLs (HTTP and HTTPS)"
