@@ -1,3 +1,9 @@
+# Get existing ACM certificate
+data "aws_acm_certificate" "wordpress" {
+  domain   = var.domain_name # Update this to match your domain
+  statuses = ["ISSUED"]
+}
+
 # ALB Configuration
 resource "aws_lb" "wordpress" {
   name               = "wordpress-alb"
@@ -36,6 +42,7 @@ resource "aws_lb_target_group" "wordpress" {
   }
 }
 
+#TODO This is just for extra test
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.wordpress.arn
   port              = "80"
@@ -47,8 +54,24 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.wordpress.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = data.aws_acm_certificate.wordpress.arn
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.wordpress.arn
+  }
+}
+
 # Add an output for the ALB DNS name
-output "wordpress_url" {
-  description = "WordPress URL"
-  value       = "http://${aws_lb.wordpress.dns_name}"
+output "wordpress_urls" {
+  description = "WordPress URLs (HTTP and HTTPS)"
+  value = {
+    http  = "http://${aws_lb.wordpress.dns_name}"
+    https = "https://${aws_lb.wordpress.dns_name}"
+  }
 }

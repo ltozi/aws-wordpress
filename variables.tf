@@ -28,3 +28,15 @@ variable "db_instance_class" {
   type        = string
   default     = "db.t3.micro" # Smallest instance for cost optimization
 }
+
+variable "domain_name" {
+description = "Domain name for the application (used for SSL certificate and CloudFront)"
+type        = string
+default     = "acmetest.me"
+}
+
+variable "enable_http" {
+description = "Whether to enable HTTP access (if false, only HTTPS will be allowed)"
+type        = bool
+default     = true
+}
