@@ -1,32 +1,42 @@
-locals {
-  cert_validation_records = {
-    for dvo in aws_acm_certificate.wordpress.domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      type   = dvo.resource_record_type
-      record = dvo.resource_record_value
-    }
-  }
-}
-
-
-# Create ACM certificate
-resource "aws_acm_certificate" "wordpress" {
-  domain_name       = "*.${var.domain_name}"
-  validation_method = "DNS"
-
-  tags = {
-    Name = "wordpress-cert"
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_acm_certificate_validation" "worpress" {
-  certificate_arn         = aws_acm_certificate.wordpress.arn
-  validation_record_fqdns = [local.cert_validation_records["*.${var.domain_name}"].name]
-}
+# locals {
+#   cert_validation_records = {
+#     for dvo in aws_acm_certificate.wordpress.domain_validation_options : dvo.domain_name => {
+#       name   = dvo.resource_record_name
+#       type   = dvo.resource_record_type
+#       record = dvo.resource_record_value
+#     }
+#   }
+# }
+#
+# # Create ACM certificate
+# resource "aws_acm_certificate" "wordpress" {
+#   domain_name       = "*.${var.domain_name}"
+#   validation_method = "DNS"
+#
+#   tags = {
+#     Name = "wordpress-cert"
+#   }
+#
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+# }
+#
+# resource "aws_acm_certificate_validation" "worpress" {
+#   certificate_arn         = aws_acm_certificate.wordpress.arn
+#   validation_record_fqdns = [local.cert_validation_records["*.${var.domain_name}"].name]
+# }
+# #
+# resource "aws_alb_listener_certificate" "wordpress" {
+#   certificate_arn = aws_acm_certificate.wordpress.arn
+#   listener_arn    = aws_lb_listener.https.arn
+# }
+#
+# # Output the DNS records needed for ACM validation
+# output "acm_validation_records" {
+#   description = "DNS records to create for ACM certificate validation"
+#   value       = local.cert_validation_records
+# }
 
 # ALB Configuration
 resource "aws_lb" "wordpress" {
@@ -110,10 +120,6 @@ resource "aws_lb_listener" "https" {
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
 
-  # TODO uncomment  if you want to generate certificate
-  #      alo uncomment the certificate generation section.
-  certificate_arn   = aws_acm_certificate.wordpress.arn
-
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.wordpress.arn
@@ -128,10 +134,4 @@ output "wordpress_urls" {
     http      = "http://${aws_lb.wordpress.dns_name}"
     https     = "https://www.${var.domain_name}"
   }
-}
-
-# Output the DNS records needed for ACM validation
-output "acm_validation_records" {
-  description = "DNS records to create for ACM certificate validation"
-  value       = local.cert_validation_records
 }
