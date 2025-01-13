@@ -32,7 +32,7 @@ variable "db_instance_class" {
 variable "domain_name" {
 description = "Domain name for the application (used for SSL certificate and CloudFront)"
 type        = string
-default     = "acmetest.me"
+default     = null
 }
 
 variable "enable_http" {
