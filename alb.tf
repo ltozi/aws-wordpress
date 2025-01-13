@@ -74,6 +74,7 @@ resource "aws_lb_listener" "http" {
   default_action {
     type = "redirect"
     redirect {
+      host        = "www.${var.domain_name}"
       port        = "443"
       protocol    = "HTTPS"
       status_code = "HTTP_301"
@@ -81,11 +82,36 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+resource "aws_lb_listener_rule" "redirect_apex_to_www" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 1
+
+  action {
+    type = "redirect"
+    redirect {
+      host        = "www.${var.domain_name}"
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+
+  condition {
+    host_header {
+      values = [var.domain_name]  # This matches requests to the apex domain (myhost.com)
+    }
+  }
+}
+
+
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.wordpress.arn
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
+
+  # TODO uncomment  if you want to generate certificate
+  #      alo uncomment the certificate generation section.
   certificate_arn   = aws_acm_certificate.wordpress.arn
 
   default_action {
@@ -100,7 +126,7 @@ output "wordpress_urls" {
   value = {
     alb_https = "https://${aws_lb.wordpress.dns_name}"
     http      = "http://${aws_lb.wordpress.dns_name}"
-    https     = "https://${var.domain_name}"
+    https     = "https://www.${var.domain_name}"
   }
 }
 
