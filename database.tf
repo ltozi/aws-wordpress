@@ -6,7 +6,7 @@ resource "aws_db_instance" "main" {
   allocated_storage                   = 20
   db_name                             = "wordpress"
   username                            = var.db_username
-  password                            = var.db_password
+  password                            = random_password.db_password.result
   skip_final_snapshot                 = true
   iam_database_authentication_enabled = true
   multi_az                            = false
@@ -16,4 +16,30 @@ resource "aws_db_instance" "main" {
   tags = {
     scope = "terraform-worpress"
   }
+}
+
+
+# Create a random password
+resource "random_password" "db_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+# Create a secret in AWS Secrets Manager
+resource "aws_secretsmanager_secret" "wordpress_db" {
+  name = "wordpress/db-password"
+
+  tags = {
+    scope = "terraform-wordpress"
+  }
+}
+
+# Store the password in Secrets Manager
+resource "aws_secretsmanager_secret_version" "wordpress_db" {
+  secret_id = aws_secretsmanager_secret.wordpress_db.id
+  secret_string = jsonencode({
+    username = var.db_username
+    password = random_password.db_password.result
+  })
 }
