@@ -1,3 +1,7 @@
+locals {
+ host = var.domain_name != null ? "www.${var.domain_name}" : aws_lb.wordpress.dns_name
+}
+
 # locals {
 #   cert_validation_records = {
 #     for dvo in aws_acm_certificate.wordpress.domain_validation_options : dvo.domain_name => {
@@ -36,6 +40,43 @@
 # output "acm_validation_records" {
 #   description = "DNS records to create for ACM certificate validation"
 #   value       = local.cert_validation_records
+# }
+#
+# resource "aws_lb_listener" "http" {
+#   load_balancer_arn = aws_lb.wordpress.arn
+#   port              = "80"
+#   protocol          = "HTTP"
+#
+#   default_action {
+#     type = "redirect"
+#     redirect {
+#       host        = "www.${var.domain_name}"
+#       port        = "443"
+#       protocol    = "HTTPS"
+#       status_code = "HTTP_301"
+#     }
+#   }
+# }
+#
+# resource "aws_lb_listener_rule" "redirect_apex_to_www" {
+#   listener_arn = aws_lb_listener.https.arn
+#   priority     = 1
+#
+#   action {
+#     type = "redirect"
+#     redirect {
+#       host        = "www.${var.domain_name}"
+#       port        = "443"
+#       protocol    = "HTTPS"
+#       status_code = "HTTP_301"
+#     }
+#   }
+#
+#   condition {
+#     host_header {
+#       values = [var.domain_name]  # This matches requests to the apex domain (myhost.com)
+#     }
+#   }
 # }
 
 # ALB Configuration
@@ -76,44 +117,6 @@ resource "aws_lb_target_group" "wordpress" {
   }
 }
 
-resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.wordpress.arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type = "redirect"
-    redirect {
-      host        = "www.${var.domain_name}"
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "redirect_apex_to_www" {
-  listener_arn = aws_lb_listener.https.arn
-  priority     = 1
-
-  action {
-    type = "redirect"
-    redirect {
-      host        = "www.${var.domain_name}"
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-
-  condition {
-    host_header {
-      values = [var.domain_name]  # This matches requests to the apex domain (myhost.com)
-    }
-  }
-}
-
-
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.wordpress.arn
   port              = "443"
@@ -132,6 +135,5 @@ output "wordpress_urls" {
   value = {
     alb_https = "https://${aws_lb.wordpress.dns_name}"
     http      = "http://${aws_lb.wordpress.dns_name}"
-    https     = "https://www.${var.domain_name}"
   }
 }
