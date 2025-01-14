@@ -82,32 +82,21 @@ terraform plan
 terraform apply
 ```
 
-## Configuration Variables
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `aws_region` | AWS Region | eu-south-1 |
-| `environment` | Environment name | development |
-| `vpc_cidr` | VPC CIDR block | 10.0.0.0/16 |
-| `db_instance_class` | RDS instance type | db.t3.medium |
-| `wordpress_image` | WordPress container image | wordpress:latest |
+Example of output:
 
-## Security Considerations
-- All sensitive data stored in AWS Secrets Manager
-- Network traffic restricted by security groups
-- Private subnets for database and application tier
-- SSL/TLS encryption for data in transit
+```shell
 
+github_actions_access_key = "AKIAYUMVHSPI5Z5FXXXX"
+github_actions_role_arn = "arn:aws:iam::643555330001:role/ci/github-actions-wordpress-deploy"
+github_actions_secret_key = <sensitive>
 
-## Cost Considerations
-- ECS Fargate: Pay for used resources only
-- RDS: Costs vary based on instance size and storage
-- EFS: Pay for storage used
-- ALB: Hourly rate plus bandwidth
-- NAT Gateway: Hourly rate plus data processing
-- Consider reserved instances for RDS to reduce costs
-- Enable auto-scaling policies to optimize resource usage
+wordpress_urls = {
+  "alb_https" = "https://wordpress-alb-xxxxxxxxxx.eu-south-1.elb.amazonaws.com"
+}
+```
 
-## Support
-For issues and feature requests, please open an issue in the repository.
+Access the application using the url in the output "alb_https". The first time the database must be configured.
 
-[Architecture Diagram]: path/to/architecture/diagram.png
+Please note that the https certificate is self signed and left in the ssl dir intentionally to use https provisioning 
+for the sake of simplicity. A real domain is not available so we are using the amazon domain for which we cannot 
+generate a certificate because we don't own that domain.
