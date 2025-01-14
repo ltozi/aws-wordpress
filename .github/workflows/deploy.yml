@@ -1,8 +1,13 @@
 name: Deploy WordPress Version
 
+#on:
+#  release:
+#    types: [published]  # Trigger only when a release is published (created)
+
 on:
-  release:
-    types: [published]  # Trigger only when a release is published (created)
+  push:
+    branches:
+      - master
 
 
 env:
