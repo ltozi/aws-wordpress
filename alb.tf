@@ -88,7 +88,7 @@ resource "aws_lb" "wordpress" {
   enable_deletion_protection = false
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -111,7 +111,7 @@ resource "aws_lb_target_group" "wordpress" {
   }
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 

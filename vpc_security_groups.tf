@@ -28,7 +28,7 @@ resource "aws_security_group" "alb" {
   }
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -53,7 +53,7 @@ resource "aws_security_group" "ecs" {
   }
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -70,7 +70,7 @@ resource "aws_security_group" "efs" {
   }
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -88,7 +88,7 @@ resource "aws_security_group" "rds" {
   }
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 

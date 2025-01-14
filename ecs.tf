@@ -30,7 +30,7 @@ resource "aws_iam_role" "ecs_task_role" {
   })
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -83,7 +83,7 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   })
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -231,7 +231,7 @@ resource "aws_ecs_service" "wordpress" {
   }
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -268,7 +268,7 @@ resource "aws_efs_access_point" "wordpress" {
   }
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -287,7 +287,7 @@ resource "aws_cloudwatch_log_group" "wordpress" {
   retention_in_days = 1
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 

@@ -38,7 +38,7 @@ resource "aws_iam_role" "github_actions" {
   }
 }
 
-# Create policy for ECS deployments
+# Create policy for Terraform deployments
 resource "aws_iam_policy" "deploy" {
   name        = "wordpress-deploy-policy"
   path        = "/ci/"
@@ -51,94 +51,125 @@ resource "aws_iam_policy" "deploy" {
       {
         Effect = "Allow"
         Action = [
-          "ecs:UpdateService",
-          "ecs:DescribeServices",
-          "ecs:DescribeTaskDefinition",
-          "ecs:RegisterTaskDefinition",
-          "ecs:DescribeClusters"
+          "ecs:*",
+          "ecr:*",
+          "logs:*",
+          "cloudwatch:*"
         ]
-        Resource = [
-          "arn:aws:ecs:*:*:service/wordpress-cluster/wordpress",
-          "arn:aws:ecs:*:*:task-definition/wordpress:*",
-          "arn:aws:ecs:*:*:cluster/wordpress-cluster"
-        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "aws:ResourceTag/scope" = "terraform-wordpress"
+          }
+        }
       },
-      # IAM Permissions
+      # RDS Permissions
       {
         Effect = "Allow"
         Action = [
-          "iam:PassRole",
-          "iam:GetRole",
-          "iam:GetPolicy"
+          "rds:*",
+          "secretsmanager:*"
         ]
-        Resource = [
-          "arn:aws:iam::*:role/wordpress-task-role",
-          "arn:aws:iam::*:role/wordpress-execution-role",
-          "arn:aws:iam::*:policy/ci/wordpress-deploy-policy"
-        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "aws:ResourceTag/scope" = "terraform-wordpress"
+          }
+        }
       },
-      # S3 Permissions
+      # VPC Permissions
       {
         Effect = "Allow"
         Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:ListBucket"
+          "ec2:*",
+          "vpc:*"
         ]
-        Resource = [
-          "arn:aws:s3:::*"
-        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "aws:ResourceTag/scope" = "terraform-wordpress"
+          }
+        }
       },
-      # ACM Permissions
+      # ALB Permissions
       {
         Effect = "Allow"
         Action = [
-          "acm:DescribeCertificate"
+          "elasticloadbalancing:*",
+          "acm:*"
         ]
-        Resource = [
-          "arn:aws:acm:*:*:certificate/*"
-        ]
-      },
-      # Secrets Manager Permissions
-      {
-        Effect = "Allow"
-        Action = [
-          "secretsmanager:DescribeSecret"
-        ]
-        Resource = [
-          "arn:aws:secretsmanager:*:*:secret:worpress-db-password-*"
-        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "aws:ResourceTag/scope" = "terraform-wordpress"
+          }
+        }
       },
       # EFS Permissions
       {
         Effect = "Allow"
         Action = [
-          "elasticfilesystem:DescribeFileSystems"
+          "elasticfilesystem:*"
         ]
-        Resource = [
-          "arn:aws:elasticfilesystem:*:*:file-system/*"
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "aws:ResourceTag/scope" = "terraform-wordpress"
+          }
+        }
+      },
+      # IAM Permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:*",
+          "sts:*"
         ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "aws:ResourceTag/scope" = "terraform-wordpress"
+          }
+        }
+      },
+      # S3 Permissions (for Terraform state)
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:*"
+        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "aws:ResourceTag/scope" = "terraform-wordpress"
+          }
+        }
       },
       # CloudWatch Logs Permissions
       {
         Effect = "Allow"
         Action = [
-          "logs:DescribeLogGroups"
+          "logs:*"
         ]
-        Resource = [
-          "arn:aws:logs:*:*:log-group:*"
-        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "aws:ResourceTag/scope" = "terraform-wordpress"
+          }
+        }
       },
-      # EC2 Permissions
+      # Autoscaling Permissions
       {
         Effect = "Allow"
         Action = [
-          "ec2:DescribeAvailabilityZones",
-          "ec2:DescribeVpcs"
+          "application-autoscaling:*"
         ]
-        Resource = [
-          "*"
-        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "aws:ResourceTag/scope" = "terraform-wordpress"
+          }
+        }
       }
     ]
   })

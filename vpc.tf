@@ -6,7 +6,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -22,7 +22,7 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name  = "wordpress-public-${count.index + 1}"
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -32,7 +32,7 @@ resource "aws_internet_gateway" "main" {
 
   tags = {
     Name  = "wordpress-igw"
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -47,7 +47,7 @@ resource "aws_route_table" "public" {
 
   tags = {
     Name  = "wordpress-public-rt"
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -67,7 +67,7 @@ resource "aws_subnet" "private" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
 
@@ -77,6 +77,6 @@ resource "aws_db_subnet_group" "main" {
   subnet_ids = aws_subnet.private[*].id
 
   tags = {
-    scope = "terraform-worpress"
+    scope = "terraform-wordpress"
   }
 }
