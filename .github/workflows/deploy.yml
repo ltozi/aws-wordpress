@@ -1,9 +1,9 @@
 name: Deploy WordPress Version
 
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [published]  # Trigger only when a release is published (created)
+
 
 env:
   TF_VERSION: '1.10.6'
