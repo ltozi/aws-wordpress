@@ -54,7 +54,8 @@ resource "aws_iam_policy" "deploy" {
           "ecs:DescribeServices",
           "ecs:DescribeTaskDefinition",
           "ecs:RegisterTaskDefinition",
-          "iam:PassRole"
+          "iam:PassRole",
+          "sts:TagSession"
         ]
         Resource = [
           "arn:aws:ecs:*:*:service/wordpress-cluster/wordpress",
@@ -94,7 +95,10 @@ resource "aws_iam_user_policy" "assume_role" {
     Statement = [
       {
         Effect = "Allow"
-        Action = "sts:AssumeRole"
+        Action = [
+          "sts:AssumeRole",
+          "sts:TagSession"  # Add this permission
+        ]
         Resource = aws_iam_role.github_actions.arn
       }
     ]
@@ -115,4 +119,3 @@ output "github_actions_secret_key" {
 output "github_actions_role_arn" {
   value = aws_iam_role.github_actions.arn
 }
-
