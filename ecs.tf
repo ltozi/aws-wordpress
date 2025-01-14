@@ -209,7 +209,7 @@ resource "aws_ecs_service" "wordpress" {
   desired_count          = 1
   launch_type            = "FARGATE"
   enable_execute_command = true
-
+  wait_for_steady_state  = true
   #   deployment_maximum_percent = 100
   #   deployment_minimum_healthy_percent = 0
 
