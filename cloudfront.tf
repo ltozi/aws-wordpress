@@ -1,22 +1,3 @@
-# ACM Certificate for CloudFront
-resource "aws_acm_certificate" "cloudfront" {
-  provider                  = aws
-  domain_name               = var.domain_name
-  subject_alternative_names = ["*.${var.domain_name}"]
-  validation_method         = "DNS"
-
-  tags = {
-    Name        = "${var.project_name}-cloudfront-cert"
-    Environment = var.environment
-    Project     = var.project_name
-    Terraform   = "true"
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
 # CloudFront Distribution
 resource "aws_cloudfront_distribution" "main" {
   enabled             = true
@@ -57,7 +38,7 @@ resource "aws_cloudfront_distribution" "main" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate.cloudfront.arn
+    acm_certificate_arn      = aws_acm_certificate.wordpress.arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
@@ -69,10 +50,7 @@ resource "aws_cloudfront_distribution" "main" {
   }
 
   tags = {
-    Name        = "${var.project_name}-cloudfront"
-    Environment = var.environment
-    Project     = var.project_name
-    Terraform   = "true"
+    Name        = "worpress-cloudfront"
   }
 }
 
