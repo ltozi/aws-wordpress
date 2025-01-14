@@ -27,6 +27,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-duration-seconds: 900
+          role-skip-session-tagging: true  # Disable session tags
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
