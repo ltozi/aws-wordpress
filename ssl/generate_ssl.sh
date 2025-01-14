@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set variables
-DOMAIN="mydomain.local" # Replace with your domain or ALB DNS name
+DOMAIN="*.mydomain.local" # Replace with your domain or ALB DNS name
 CERT_VALID_DAYS=365     # Validity period for the self-signed certificate
 PRIVATE_KEY_FILE="private.key"
 CERTIFICATE_FILE="certificate.crt"
