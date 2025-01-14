@@ -133,6 +133,5 @@ output "wordpress_urls" {
   description = "WordPress URLs (HTTP and HTTPS)"
   value = {
     alb_https = "https://${aws_lb.wordpress.dns_name}"
-    http      = "http://${aws_lb.wordpress.dns_name}"
   }
 }
