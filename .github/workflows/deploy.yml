@@ -7,7 +7,7 @@ name: Deploy WordPress Version
 on:
   push:
     branches:
-      - master
+      - main
 
 
 env:
