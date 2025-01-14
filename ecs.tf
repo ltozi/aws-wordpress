@@ -140,7 +140,7 @@ resource "aws_ecs_task_definition" "wordpress" {
 
   container_definitions = jsonencode([{
     name      = "wordpress"
-    image     = "wordpress:latest"
+    image     = "wordpress:${var.wordpress_version}"
     essential = true
     cpu       = 256
     memory    = 512

@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "wordpress_version" {
   description = "WordPress Docker image version to use"
   type        = string
-  default     = "latest"
+  default     = "6.7"
 }
 
 variable "db_username" {
