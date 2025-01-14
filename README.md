@@ -12,7 +12,7 @@ This project provides Infrastructure as Code (IaC) for deploying a highly availa
 
 ## Architecture Overview
 
-![img.png](img.png)
+![architecture.png](architecture.png)
 
 Key Components:
 - VPC with public and private subnets across multiple AZs
