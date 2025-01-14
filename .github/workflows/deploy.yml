@@ -42,7 +42,7 @@ jobs:
         run: |
           terraform init \
             -backend-config="bucket=${{ env.TF_STATE_BUCKET }}" \
-            -backend-config="key=wordpress/terraform.tfstate" \
+            -backend-config="key=wordpress" \
             -backend-config="region=${{ env.AWS_REGION }}"
 
       - name: Terraform Plan
