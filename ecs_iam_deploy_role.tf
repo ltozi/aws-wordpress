@@ -47,6 +47,7 @@ resource "aws_iam_policy" "deploy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      # ECS Permissions
       {
         Effect = "Allow"
         Action = [
@@ -54,16 +55,29 @@ resource "aws_iam_policy" "deploy" {
           "ecs:DescribeServices",
           "ecs:DescribeTaskDefinition",
           "ecs:RegisterTaskDefinition",
-          "iam:PassRole",
-          "sts:TagSession"
+          "ecs:DescribeClusters"
         ]
         Resource = [
           "arn:aws:ecs:*:*:service/wordpress-cluster/wordpress",
           "arn:aws:ecs:*:*:task-definition/wordpress:*",
-          "arn:aws:iam::*:role/wordpress-task-role",
-          "arn:aws:iam::*:role/wordpress-execution-role"
+          "arn:aws:ecs:*:*:cluster/wordpress-cluster"
         ]
       },
+      # IAM Permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole",
+          "iam:GetRole",
+          "iam:GetPolicy"
+        ]
+        Resource = [
+          "arn:aws:iam::*:role/wordpress-task-role",
+          "arn:aws:iam::*:role/wordpress-execution-role",
+          "arn:aws:iam::*:policy/ci/wordpress-deploy-policy"
+        ]
+      },
+      # S3 Permissions
       {
         Effect = "Allow"
         Action = [
@@ -73,6 +87,57 @@ resource "aws_iam_policy" "deploy" {
         ]
         Resource = [
           "arn:aws:s3:::*"
+        ]
+      },
+      # ACM Permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "acm:DescribeCertificate"
+        ]
+        Resource = [
+          "arn:aws:acm:*:*:certificate/*"
+        ]
+      },
+      # Secrets Manager Permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = [
+          "arn:aws:secretsmanager:*:*:secret:worpress-db-password-*"
+        ]
+      },
+      # EFS Permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "elasticfilesystem:DescribeFileSystems"
+        ]
+        Resource = [
+          "arn:aws:elasticfilesystem:*:*:file-system/*"
+        ]
+      },
+      # CloudWatch Logs Permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogGroups"
+        ]
+        Resource = [
+          "arn:aws:logs:*:*:log-group:*"
+        ]
+      },
+      # EC2 Permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeVpcs"
+        ]
+        Resource = [
+          "*"
         ]
       }
     ]
@@ -97,7 +162,7 @@ resource "aws_iam_user_policy" "assume_role" {
         Effect = "Allow"
         Action = [
           "sts:AssumeRole",
-          "sts:TagSession"  # Add this permission
+          "sts:TagSession"
         ]
         Resource = aws_iam_role.github_actions.arn
       }
