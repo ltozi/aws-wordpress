@@ -7,11 +7,8 @@ terraform {
     }
   }
 
-  # This bucket must already exist. See pre requirements in README.md for the command to create it.
-  backend "s3" {
-    bucket = "terraform-wordpress-state"
-    key = "wordpress"
-  }
+  # Use terraform init -backend-config="env/some_config.hcl"
+  backend "s3" {}
 
 }
 
