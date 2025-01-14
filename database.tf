@@ -9,7 +9,7 @@ resource "aws_db_instance" "main" {
   password                            = random_password.db_password.result
   skip_final_snapshot                 = true
   iam_database_authentication_enabled = true
-  multi_az                            = false
+  multi_az                            = true
   db_subnet_group_name                = aws_db_subnet_group.main.name
   vpc_security_group_ids              = [aws_security_group.rds.id]
 
@@ -28,8 +28,7 @@ resource "random_password" "db_password" {
 
 # Create a secret in AWS Secrets Manager
 resource "aws_secretsmanager_secret" "wordpress_db" {
-  name = "wordpress/db-password"
-
+  name_prefix = "worpress-db-password-"
   tags = {
     scope = "terraform-wordpress"
   }
