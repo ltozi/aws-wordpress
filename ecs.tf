@@ -156,6 +156,17 @@ resource "aws_ecs_task_definition" "wordpress" {
       }
     }
 
+    healthCheck = {
+      command = [
+        "CMD-SHELL",
+        "curl -f http://localhost/wp-admin/install.php || exit 1"
+      ]
+      interval    = 30
+      timeout     = 5
+      retries     = 3
+      startPeriod = 60
+    }
+
     volumes = [{
       name = "wordpress-data"
       efsVolumeConfiguration = {
