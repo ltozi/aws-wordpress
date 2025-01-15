@@ -30,7 +30,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+#          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-duration-seconds: 900
           role-skip-session-tagging: true  # Disable session tags
 
