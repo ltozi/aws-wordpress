@@ -46,6 +46,6 @@ jobs:
             -backend-config="key=wordpress" \
             -backend-config="region=${{ env.AWS_REGION }}"
 
-      - name: Terraform Plan/Apply (main branch only)
+      - name: Terraform Apply (main branch only)
         if: github.ref == 'refs/heads/main'
         run: terraform apply --target=aws_ecs_service.wordpress --auto-approve
