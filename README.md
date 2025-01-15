@@ -101,3 +101,18 @@ Access the application using the url in the output "alb_https". The first time t
 Please note that the https certificate is self signed and left in the ssl dir intentionally to use https provisioning 
 for the sake of simplicity. A real domain is not available so we are using the amazon domain for which we cannot 
 generate a certificate because we don't own that domain.
+
+
+## Deployment
+
+The deployment is based on Github release and tag. Every time a new release is created with the associate tag, a deploy
+will be done using the same terraform code by passing the version tag as the docker image version of the wordpress container..
+
+Go to [Github release page](https://github.com/ltozi/aws-wordpress/releases) Github release page to start a new release 
+and deploy a new version.
+
+Update the credentials to trigger a deploy **AWS_ACCESS_KEY_ID** and **AWS_ACCESS_KEY** in the dev environment 
+inside the repo.
+
+Also, set up TF_STATE_BUCKET in plain text as var in the same environment.
+
