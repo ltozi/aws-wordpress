@@ -297,7 +297,7 @@ resource "aws_cloudwatch_log_group" "wordpress" {
 # First, define the autoscaling target
 resource "aws_appautoscaling_target" "wordpress" {
   max_capacity       = 4
-  min_capacity       = 1
+  min_capacity       = 2
   resource_id        = "service/${aws_ecs_cluster.wordpress.name}/${aws_ecs_service.wordpress.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
