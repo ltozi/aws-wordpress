@@ -215,7 +215,7 @@ resource "aws_ecs_service" "wordpress" {
 
   deployment_circuit_breaker {
     enable   = true
-    rollback = false
+    rollback = true
   }
 
   network_configuration {
