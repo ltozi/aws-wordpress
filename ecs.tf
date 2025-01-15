@@ -116,8 +116,8 @@ resource "aws_ecs_task_definition" "wordpress" {
   family                   = "wordpress"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  cpu                      = 512
-  memory                   = 1024
+  cpu                      = 1024
+  memory                   = 2048
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
 
@@ -140,7 +140,7 @@ resource "aws_ecs_task_definition" "wordpress" {
 
   container_definitions = jsonencode([{
     name      = "wordpress"
-    image     = "wordpress:${var.wordpress_version}"
+    image     = "public.ecr.aws/docker/library/wordpress:${var.wordpress_version}"
     essential = true
     #     entryPoint = ["sh", "-c"]
     #     command    = ["ls -la /var/www/html"]
