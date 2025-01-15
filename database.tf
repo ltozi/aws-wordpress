@@ -16,6 +16,10 @@ resource "aws_db_instance" "main" {
   tags = {
     scope = "terraform-wordpress"
   }
+
+  lifecycle {
+    ignore_changes = [multi_az]
+  }
 }
 
 
