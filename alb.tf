@@ -1,5 +1,5 @@
 locals {
- host = var.domain_name != null ? "www.${var.domain_name}" : aws_lb.wordpress.dns_name
+  host = var.domain_name != null ? "www.${var.domain_name}" : aws_lb.wordpress.dns_name
 }
 
 locals {
@@ -14,9 +14,9 @@ locals {
 
 # Create ACM certificate
 resource "aws_acm_certificate" "wordpress" {
-#   domain_name       = "*.${var.domain_name}"
-#   validation_method = "DNS"
-  private_key = file("ssl/private.key")
+  #   domain_name       = "*.${var.domain_name}"
+  #   validation_method = "DNS"
+  private_key      = file("ssl/private.key")
   certificate_body = file("ssl/certificate.crt")
 
   tags = {
@@ -72,7 +72,7 @@ resource "aws_lb_listener_rule" "redirect_apex_to_www" {
 
   condition {
     host_header {
-      values = [var.domain_name]  # This matches requests to the apex domain (myhost.com)
+      values = [var.domain_name] # This matches requests to the apex domain (myhost.com)
     }
   }
 }
@@ -117,7 +117,7 @@ resource "aws_lb_target_group" "wordpress" {
 
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.wordpress.arn
-  certificate_arn = aws_acm_certificate.wordpress.arn
+  certificate_arn   = aws_acm_certificate.wordpress.arn
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"

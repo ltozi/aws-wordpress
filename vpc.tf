@@ -62,8 +62,8 @@ resource "aws_route_table_association" "public" {
 # Create private subnets for the database
 resource "aws_subnet" "private" {
   count             = 2
-  vpc_id           = aws_vpc.main.id
-  cidr_block       = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + 30)
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + 30)
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {

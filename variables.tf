@@ -30,13 +30,13 @@ variable "db_instance_class" {
 }
 
 variable "domain_name" {
-description = "Domain name for the application (used for SSL certificate and CloudFront)"
-type        = string
-default     = null
+  description = "Domain name for the application (used for SSL certificate and CloudFront)"
+  type        = string
+  default     = null
 }
 
 variable "enable_http" {
-description = "Whether to enable HTTP access (if false, only HTTPS will be allowed)"
-type        = bool
-default     = true
+  description = "Whether to enable HTTP access (if false, only HTTPS will be allowed)"
+  type        = bool
+  default     = true
 }
