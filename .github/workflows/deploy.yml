@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  release:
+    types: [ published, edited ]
+
 
 env:
   TF_VERSION: '1.10.4'
@@ -33,19 +36,26 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Extract version from tag
-        run: |
-          TAG_VERSION=${GITHUB_REF#refs/tags/v}
-          echo "TF_VAR_wordpress_version=${TAG_VERSION}"
-          echo "TF_VAR_wordpress_version=${TAG_VERSION}" >> $GITHUB_ENV
-
       - name: Terraform Init
+        if: github.event_name == 'release'
         run: |
           terraform init \
             -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
             -backend-config="key=wordpress" \
             -backend-config="region=${{ env.AWS_REGION }}"
 
-      - name: Terraform Apply (main branch only)
-        if: github.ref == 'refs/heads/main'
-        run: terraform apply --target=aws_ecs_service.wordpress --auto-approve
+      - name: Get and Strip 'v' from Release Tag
+        id: get_release_tag
+        if: github.event_name == 'release'
+        run: |
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          TAG="${TAG_WITH_V#v}"
+          echo "Releasing version: ${TAG}"
+          
+          # Regex to validate the tag format (e.g., x.y.z, x.y.z-rc.1, etc.)
+          if [[ ! "${TAG}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-[a-zA-Z0-9]+(\.[0-9]+)?)?$ ]]; then
+            echo "::error::Invalid tag format: ${TAG}. Expected format: x.y.z or x.y.z-prerelease.n"
+            exit 1 # Fail the workflow
+          fi
+          
+          terraform apply --target=aws_ecs_service.wordpress --var=wordpress_version=${TAG} --auto-approve
