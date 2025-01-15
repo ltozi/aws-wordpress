@@ -22,6 +22,12 @@ Key Components:
 - Application Load Balancer with SSL/TLS termination
 - Security Groups for network access control
 
+Please note that this is the target desired architecture but some components in the diagram are still to be configured:
+
+- Cloudfront CDN is just in a branch until a real domain will be available.
+- Wordpress can be configured to push pull static content from storage buckets to better improve performance and save some costs.
+- Web application firewall WAF is on a branch and needs to be tested.
+
 ## Prerequisites
 - AWS Account with administrative access.
 - Terraform (version >= 1.10)
@@ -37,7 +43,13 @@ git clone <repository-url>
 
 When you're in the terraform root module, run this to setup a bucket for terraform
 
-Create and select your AWS profile and change the variable below before running the script
+Create and select your AWS profile
+
+```shell
+aws configure --profile terraform-worpress
+```
+
+Change the variable AWS_PROFILE in the script below and run it.
 
 ```shell
 export AWS_PROFILE=${MY_AWS_PROFILE_NAME} 
@@ -66,13 +78,7 @@ WARNING: Be sure the s3 bucket for terraform state is created! Check the file co
 terraform init -backend-config="env/backend_s3_personal.hcl"
 ```
 
-3. Configure variables:
-```bash
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your specific values
-```
-
-4. Review the execution plan:
+3. Review the execution plan:
 ```bash
 terraform plan
 ```
@@ -85,11 +91,6 @@ terraform apply
 Example of output:
 
 ```shell
-
-github_actions_access_key = "AKIAYUMVHSPI5Z5FXXXX"
-github_actions_role_arn = "arn:aws:iam::643555330001:role/ci/github-actions-wordpress-deploy"
-github_actions_secret_key = <sensitive>
-
 wordpress_urls = {
   "alb_https" = "https://wordpress-alb-xxxxxxxxxx.eu-south-1.elb.amazonaws.com"
 }
