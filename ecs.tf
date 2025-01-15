@@ -142,8 +142,6 @@ resource "aws_ecs_task_definition" "wordpress" {
     name      = "wordpress"
     image     = "wordpress:${var.wordpress_version}"
     essential = true
-    cpu       = 256
-    memory    = 512
     #     entryPoint = ["sh", "-c"]
     #     command    = ["ls -la /var/www/html"]
 
@@ -232,6 +230,10 @@ resource "aws_ecs_service" "wordpress" {
 
   tags = {
     scope = "terraform-wordpress"
+  }
+
+  timeouts {
+    update = "5m"
   }
 }
 
